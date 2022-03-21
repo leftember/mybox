@@ -60,7 +60,6 @@ class trie:
         if len(v) > 0:
             return None
         else:
-            print('found ' + n.val)
             return n
 
     def insert(self, s, i = 0, n = None):
@@ -117,7 +116,7 @@ class trie:
                     break
                 if n == self.root:
                     break
-                n = n.fail
+                n = n.end
             # calcuate matches.
             m = n
             while True:
@@ -138,7 +137,11 @@ if __name__  == '__main__':
     text = 'bcdeabcdeabcdefeabdefeccccbcdec'
     print(text)
     t.search_text(text)
-    #print(t.search('abd'))
-    #print(t.search('abcde'))
-    #print(t.search('abb'))
 
+
+    s = {'b','c','aa','d','b'}
+    t2= trie()
+    t2.build_tree(s)
+    t.printTree(t2.root)
+    text = 'caaab'
+    t2.search_text(text)
