@@ -19,22 +19,21 @@ class trie:
             for i in range(26):
                 trie.indexes[chr(ord('a')+i)] = i
 
-    def insert(self,s):
-        if len(s) > 0:
-            index = self.indexes[s[0]]
-            if not self.root.nodes[index]:
-                self.root.nodes[index] = node(s[0])
-            self.insert2(self.root.nodes[index], s, 0)
-
-    def insert2(self, n, s, i):
+    def insert(self, s, i = 0, n = None):
         if i < len(s):
             if (i == len(s) -1):
                 # the last one
                 return
+            if not n: # root node
+                n = self.root
+                index = self.indexes[s[0]]
+                if not n.nodes[index]:
+                    n.nodes[index] = node(None)
+                n = n.nodes[index]
             index = self.indexes[s[i+1]]
             if not n.nodes[index]:
-                n.nodes[index] = node(s[i+1])
-            self.insert2(n.nodes[index], s, i+1)
+                n.nodes[index] = node(None)
+            self.insert(s, i + 1, n.nodes[index])
 
     def search(self, s):
         return self.search2(s, 0, self.root)
@@ -48,7 +47,9 @@ class trie:
         else:
             return False
 
-    def printTree2(self, node):
+    def printTree(self, node = None):
+        if not node:
+            node = self.root
         queue = [node]
         while len(queue) > 0:
             t = queue.pop(0)
@@ -63,7 +64,7 @@ if __name__  == '__main__':
     t = trie()
     t.insert('abcdfe')
     t.insert(s)
-    t.printTree2(t.root)
+    t.printTree(t.root)
     print(t.search('abd'))
     print(t.search('abcde'))
     print(t.search('abb'))
