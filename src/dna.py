@@ -9,8 +9,7 @@ import datetime
 import bisect
 
 class node:
-     def __init__(self, v):
-         self.val = v # shouldn't need this and can combined to next field.
+     def __init__(self):
          self.health = None # determine the leaf.
          self.nodes = [None] * 26
          self.end = None
@@ -18,7 +17,7 @@ class node:
 
 class trie:
     def __init__(self):
-        self.root = node(None)
+        self.root = node()
         self.HHH = None
 
     def build_tree(self, arr, healths):
@@ -36,33 +35,27 @@ class trie:
                 for i,v in enumerate(t.nodes):
                     if v:
                         v.end = self.root
-                        #print(f'pointing {v.val} to {i} {v.end.val}')
+                        #print(f'pointing  to {i}')
                         if v.health:
                             v.term.append(v)
                         queue.append(v)
                 continue
             for i,v in enumerate(t.nodes):
                 if v:
-                    v.end = t.end.nodes[i]
-                    #print(f'pointing {v.val} to {i} {v.end.val}')
+                    mm = t
+                    while not mm.end.nodes[i]:
+                        mm = mm.end
+                        if mm == self.root:
+                            break
+                    if mm == self.root:
+                        v.end = self.root
+                    else:
+                        v.end = mm.end.nodes[i]
+                    #print(f'pointing to {i}  {v.end.term} ')
                     v.term = v.end.term.copy()
                     if v.health:
                         v.term.append(v)
                     queue.append(v)
-
-    def find_node(self, v):
-        n = self.root
-        while len(v) > 0:
-            index = ord(v[0])-97
-            nn = n.nodes[index]
-            if not nn:
-                break
-            n = nn
-            v = v[1:]
-        if len(v) > 0:
-            return None
-        else:
-            return n
 
     def insert(self, s, oindex, i = 0, n = None):
         if i < len(s):
@@ -70,7 +63,7 @@ class trie:
                 n = self.root
                 index = ord(s[0]) - 97
                 if not n.nodes[index]:
-                    n.nodes[index] = node(s[0])
+                    n.nodes[index] = node()
                 n = n.nodes[index]
             if i == len(s) -1:
                 # the last one
@@ -81,7 +74,7 @@ class trie:
                 return
             index = ord(s[i+1]) - 97
             if not n.nodes[index]:
-                n.nodes[index] = node(s[:i+2])
+                n.nodes[index] = node()
             self.insert(s, oindex, i + 1, n.nodes[index])
 
     def search_text(self, text, first, last):
@@ -108,8 +101,6 @@ class trie:
                 right = bisect.bisect_right(m.health, last)
                 if right == 0 and m.health[right] != last:
                     continue
-                if right < len(m.health) and  m.health[right] == last:
-                    right += 1
                 for iii in range(left, right):
                     #print(f'adding {self.HHH[m.health[iii]]}')
                     score += self.HHH[m.health[iii]]
