@@ -65,8 +65,12 @@ class trie:
                 n.nodes[index] = node()
             n = n.nodes[index]
         if not n.health:
-            n.health = []
-        n.health.append(oindex)
+            # presum from start until oindex.
+            n.health = [[oindex], [self.HHH[oindex]]]
+        else:
+            #n.health.append((oindex, self.HHH[oindex]+ n.health[-1][1]))
+            n.health[0].append(oindex)
+            n.health[1].append(self.HHH[oindex] + n.health[1][-1])
 
     def search_text(self, text, first, last):
         score = 0
@@ -82,14 +86,16 @@ class trie:
                 n = n.end
             # calcuate matches.
             for m in n.term:
-                #print(f'found {m.val} in gene: {m.health} --- {first}----{last}')
-                left = bisect.bisect_left(m.health, first)
-                if left >= len(m.health):
+                #print(f'found in gene: {m.health} --- {first}----{last}')
+                ids,hs = m.health
+                left = bisect.bisect_left(ids, first)
+                if left >= len(ids):
                     continue
-                right = bisect.bisect_right(m.health, last)
-                for iii in range(left, right):
-                    #print(f'adding {self.HHH[m.health[iii]]}')
-                    score += self.HHH[m.health[iii]]
+                right = bisect.bisect_right(ids, last)
+                #print(left, right, hs)
+                score += hs[right-1]
+                if left != right - 1:
+                    score -= hs[left]
         return score
 
 
@@ -108,7 +114,7 @@ if __name__ == '__main__':
     for s_itr in range(s):
         first, last, d = input().split()
         #print(d)
-        score = tree.search_text(d, int(first), int(last))
-        low, high = min(low, score), max(high, score)
+        sss = tree.search_text(d, int(first), int(last))
+        low, high = min(low, sss), max(high, sss)
     print(f'{low} {high}')
 
