@@ -13,7 +13,6 @@ class node:
          self.health = None # determine the leaf.
          self.nodes = [None] * 26
          self.end = None
-         self.term = []
 
 class trie:
     def __init__(self):
@@ -25,6 +24,7 @@ class trie:
         for i in range(len(arr)):
             self.insert(arr[i], i)
         # build fail pointers.
+        print('insert done')
         self.root.end = self.root
         queue = [self.root]
         while len(queue) > 0:
@@ -35,9 +35,6 @@ class trie:
                 for i,v in enumerate(t.nodes):
                     if v:
                         v.end = self.root
-                        #print(f'pointing  to {i}')
-                        if v.health:
-                            v.term.append(v)
                         queue.append(v)
                 continue
             for i,v in enumerate(t.nodes):
@@ -51,10 +48,6 @@ class trie:
                         v.end = self.root
                     else:
                         v.end = mm.end.nodes[i]
-                    #print(f'pointing to {i}  {v.end.term} ')
-                    v.term = v.end.term.copy()
-                    if v.health:
-                        v.term.append(v)
                     queue.append(v)
 
     def insert(self, s, oindex):
@@ -66,36 +59,34 @@ class trie:
             n = n.nodes[index]
         if not n.health:
             # presum from start until oindex.
-            n.health = [[oindex], [self.HHH[oindex]]]
-        else:
-            #n.health.append((oindex, self.HHH[oindex]+ n.health[-1][1]))
-            n.health[0].append(oindex)
-            n.health[1].append(self.HHH[oindex] + n.health[1][-1])
+            n.health = [[0], [0]]
+        #n.health.append((oindex, self.HHH[oindex]+ n.health[-1][1]))
+        n.health[0].append(oindex)
+        n.health[1].append(self.HHH[oindex] + n.health[1][-1])
 
     def search_text(self, text, first, last):
         score = 0
         n = self.root
         for cc in text:
             index = ord(cc) - 97
-            while True:
-                if n.nodes[index]:
-                    n = n.nodes[index]
-                    break
-                if n == self.root:
-                    break
+            while n != self.root and not n.nodes[index]:
                 n = n.end
+            if not n.nodes[index]:
+                continue
+            n = n.nodes[index]
             # calcuate matches.
-            for m in n.term:
+            m = n
+            while m != self.root: 
+                if m.health:
                 #print(f'found in gene: {m.health} --- {first}----{last}')
-                ids,hs = m.health
-                left = bisect.bisect_left(ids, first)
-                if left >= len(ids):
-                    continue
-                right = bisect.bisect_right(ids, last)
-                #print(left, right, hs)
-                score += hs[right-1]
-                if left != right - 1:
-                    score -= hs[left]
+                    ids,hs = m.health
+                    left = bisect.bisect_left(ids, first)
+                    if left >= len(ids):
+                        continue
+                    right = bisect.bisect_right(ids, last)
+                    #print(left, right,ids, hs)
+                    score += hs[right-1]-hs[left-1 if left > 0 else 0]
+                m = m.end
         return score
 
 
@@ -111,10 +102,16 @@ if __name__ == '__main__':
     tree.build_tree(genes, health)
     print('tree done')
 
+    cnt = 0
+
     for s_itr in range(s):
         first, last, d = input().split()
         #print(d)
         sss = tree.search_text(d, int(first), int(last))
+        #print(first, last, '->', sss)
         low, high = min(low, sss), max(high, sss)
+        cnt += 1
+        if cnt == 2:
+            break
     print(f'{low} {high}')
 
