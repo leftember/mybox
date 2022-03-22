@@ -57,25 +57,16 @@ class trie:
                         v.term.append(v)
                     queue.append(v)
 
-    def insert(self, s, oindex, i = 0, n = None):
-        if i < len(s):
-            if not n: # root node
-                n = self.root
-                index = ord(s[0]) - 97
-                if not n.nodes[index]:
-                    n.nodes[index] = node()
-                n = n.nodes[index]
-            if i == len(s) -1:
-                # the last one
-                # print(f'adding {s} {h} at {oindex}')
-                if not n.health:
-                    n.health = []
-                n.health.append(oindex)
-                return
-            index = ord(s[i+1]) - 97
+    def insert(self, s, oindex):
+        n = self.root
+        for cc in s:
+            index = ord(cc) - 97
             if not n.nodes[index]:
                 n.nodes[index] = node()
-            self.insert(s, oindex, i + 1, n.nodes[index])
+            n = n.nodes[index]
+        if not n.health:
+            n.health = []
+        n.health.append(oindex)
 
     def search_text(self, text, first, last):
         score = 0
