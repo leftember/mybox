@@ -10,7 +10,7 @@ import bisect
 
 class node:
      def __init__(self):
-         self.health = None # determine the leaf.
+         self.health = [] # determine the leaf.
          self.nodes = [None] * 26
          self.end = None
 
@@ -25,30 +25,22 @@ class trie:
             self.insert(arr[i], i)
         # build fail pointers.
         print('insert done')
-        self.root.end = self.root
         queue = [self.root]
         while len(queue) > 0:
             t = queue.pop(0)
-            if not t:
-                continue
-            if t == self.root:
-                for i,v in enumerate(t.nodes):
-                    if v:
-                        v.end = self.root
-                        queue.append(v)
-                continue
-            for i,v in enumerate(t.nodes):
-                if v:
-                    mm = t
-                    while not mm.end.nodes[i]:
-                        mm = mm.end
-                        if mm == self.root:
-                            break
-                    if mm == self.root:
-                        v.end = self.root
+            for i in range(26):
+                if t.nodes[i]:
+                    if t == self.root:
+                        t.nodes[i].end = self.root
                     else:
-                        v.end = mm.end.nodes[i]
-                    queue.append(v)
+                        mm = t.end
+                        while mm != self.root and not mm.nodes[i]:
+                            mm = mm.end
+                        if mm == self.root:
+                            t.nodes[i].end = self.root
+                        else:
+                            t.nodes[i].end = mm.nodes[i]
+                    queue.append(t.nodes[i])
 
     def insert(self, s, oindex):
         n = self.root
@@ -57,12 +49,7 @@ class trie:
             if not n.nodes[index]:
                 n.nodes[index] = node()
             n = n.nodes[index]
-        if not n.health:
-            # presum from start until oindex.
-            n.health = [[0], [0]]
-        #n.health.append((oindex, self.HHH[oindex]+ n.health[-1][1]))
-        n.health[0].append(oindex)
-        n.health[1].append(self.HHH[oindex] + n.health[1][-1])
+        n.health.append(oindex)
 
     def search_text(self, text, first, last):
         score = 0
@@ -76,16 +63,10 @@ class trie:
             n = n.nodes[index]
             # calcuate matches.
             m = n
-            while m != self.root: 
-                if m.health:
-                #print(f'found in gene: {m.health} --- {first}----{last}')
-                    ids,hs = m.health
-                    left = bisect.bisect_left(ids, first)
-                    if left >= len(ids):
-                        continue
-                    right = bisect.bisect_right(ids, last)
-                    #print(left, right,ids, hs)
-                    score += hs[right-1]-hs[left-1 if left > 0 else 0]
+            while m != self.root:
+                for hi in m.health:
+                    if hi >= first and hi <= last:
+                        score += self.HHH[hi]
                 m = m.end
         return score
 
@@ -102,7 +83,7 @@ if __name__ == '__main__':
     tree.build_tree(genes, health)
     print('tree done')
 
-    cnt = 0
+    #print(list(map(len, genes)))
 
     for s_itr in range(s):
         first, last, d = input().split()
@@ -110,8 +91,5 @@ if __name__ == '__main__':
         sss = tree.search_text(d, int(first), int(last))
         #print(first, last, '->', sss)
         low, high = min(low, sss), max(high, sss)
-        cnt += 1
-        if cnt == 2:
-            break
     print(f'{low} {high}')
 
