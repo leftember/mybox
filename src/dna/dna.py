@@ -33,13 +33,14 @@ class trie:
                     if t == self.root:
                         t.nodes[i].end = self.root
                     else:
-                        mm = t.end
-                        while mm != self.root and not mm.nodes[i]:
+                        mm = t
+                        while mm != self.root and not mm.end.nodes[i]:
                             mm = mm.end
                         if mm == self.root:
                             t.nodes[i].end = self.root
                         else:
-                            t.nodes[i].end = mm.nodes[i]
+                            t.nodes[i].end = mm.end.nodes[i]
+                    #print(f'pointing {i} to {t.nodes[i].end}')
                     queue.append(t.nodes[i])
 
     def insert(self, s, oindex):
@@ -70,6 +71,7 @@ class trie:
                 m = m.end
         return score
 
+from collections import defaultdict
 
 if __name__ == '__main__':
     n = int(input().strip())
@@ -82,6 +84,17 @@ if __name__ == '__main__':
     print(f'building {datetime.datetime.now().time()}')
     tree.build_tree(genes, health)
     print('tree done')
+
+    gMap = defaultdict(lambda: [[], [0]])
+
+    subs = set()
+    for id, gene in enumerate(genes):
+        gMap[gene][0].append(id)
+        for j in range(1, min(len(gene), 500)+1): subs.add(gene[:j])
+    for v in gMap.values():
+        for i, ix in enumerate(v[0]): v[1].append(v[1][i]+health[ix])
+    print(subs)
+    print(gMap)
 
     #print(list(map(len, genes)))
 
