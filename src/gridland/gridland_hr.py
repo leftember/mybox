@@ -5,7 +5,7 @@ import os
 import random
 import re
 import sys
-
+import hashlib
 #
 # Complete the 'gridlandProvinces' function below.
 #
@@ -34,7 +34,8 @@ def gridlandProvinces2(s, startx, starty):
             val = []
             for ll in labels:
                 val.append(s[ll[0]][ll[1]])
-            results.add(''.join(val))
+            h = hashlib.md5((''.join(val)).encode('utf-8')).hexdigest()
+            results.add(h)
             i -= 1
             if i == 0:
                 break
