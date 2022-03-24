@@ -18,7 +18,7 @@ import bisect
 
 def climbingLeaderboard(ranked, player):
     # Write your code here
-    rank = [ranked[0]]    
+    rank = [ranked[0]]
     for r in ranked:
         if r != rank[-1]:
             rank.append(r)
@@ -41,44 +41,33 @@ def climbingLeaderboard(ranked, player):
             nextr = int(last * st)
             if rank[nextr] >= p:
                 break
+            else:
+                last = nextr
         if rank[nextr] == p:
             result.append(nextr + 1)
             last = nextr
-        elif nextr == 0:
+        elif nextr == 0 and p >= rank[0]:
             result.append(1)
             reachTop = True
         else:
-            # will be in nextr <-> last.
-            while last - nextr > 1:
+            # will be in nextr <-> last.o
+            print(nextr, last)
+            while nextr < last:
                 mid = nextr + (last-nextr) // 2
-                if p > rank[mid]:
+                if p >= rank[mid]:
                     last = mid
-                elif p == rank[mid]:
-                    nextr = mid
-                    break
                 else:
-                    nextr = mid
-            if rank[nextr] == p:
-                result.append(nextr + 1)
-                last = nextr
-            elif rank[last] == p:
-                result.append(last + 1)
-            else:
-                result.append(nextr + 2)
-                last = nextr
+                    nextr = mid + 1
+            result.append(nextr + 1)
+            last = nextr
     return result
 
 if __name__ == '__main__':
 
     ranked_count = int(input().strip())
-
     ranked = list(map(int, input().rstrip().split()))
-
     player_count = int(input().strip())
-
     player = list(map(int, input().rstrip().split()))
-
     result = climbingLeaderboard(ranked, player)
-
     print('\n'.join(map(str, result)))
 
